@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasbor Perencanaan Skripsi - SPK Karyawan Terbaik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Scholarly Neutral -->
+    <!-- Application Structure Plan: Aplikasi ini dirancang sebagai dasbor interaktif berbasis tab, bukan sebagai dokumen linear. Struktur ini dipilih untuk memecah panduan skripsi yang kompleks menjadi bagian-bagian logis yang mudah dicerna (Metodologi, Arsitektur, Fitur, dll.). Pengguna dapat dengan bebas melompat ke bagian yang relevan tanpa harus menggulir teks panjang, sehingga memfasilitasi pemahaman dan perencanaan yang tidak linear. Interaksi seperti kalkulator SMART, visualisasi arsitektur, dan filter peran pengguna bertujuan untuk mengubah konsep teoretis menjadi pengalaman belajar yang praktis dan menarik. -->
+    <!-- Visualization & Content Choices: 
+        - Ringkasan Proyek -> Goal: Inform -> Presentation: Kartu ringkasan & poin kunci (HTML/Tailwind) -> Interaction: Statis -> Justification: Memberikan gambaran umum yang cepat.
+        - Metodologi SMART -> Goal: Explain Process & Compare -> Presentation: Diagram alir interaktif (HTML/CSS), kalkulator dinamis dengan input pengguna, dan diagram batang Chart.js untuk visualisasi bobot & hasil -> Interaction: Klik untuk detail, input pengguna, & tombol hitung -> Justification: Mengubah rumus matematis yang abstrak menjadi alat pembelajaran interaktif yang konkret.
+        - Arsitektur & Teknologi -> Goal: Organize & Inform -> Presentation: Kartu teknologi dan diagram alur MVP (HTML/Flexbox) -> Interaction: Hover untuk detail (implementasi di masa depan) -> Justification: Menyajikan tumpukan teknologi dan pola arsitektur secara visual dan jelas.
+        - Fitur & Alur Kerja -> Goal: Compare & Organize -> Presentation: Tombol filter peran dan diagram alir proses (HTML/CSS) -> Interaction: Klik tombol untuk memfilter daftar fitur secara dinamis -> Justification: Memudahkan pemahaman tentang hak akses dan alur kerja pengguna secara visual.
+        - Struktur Proyek -> Goal: Organize Hierarchy -> Presentation: Struktur pohon file interaktif (HTML/JS) -> Interaction: Klik untuk membuka/menutup direktori -> Justification: Jauh lebih intuitif daripada membaca daftar teks biasa.
+        - Pengujian & Validasi -> Goal: Inform in Detail -> Presentation: Kartu dengan tombol 'Lihat Detail' yang membuka modal (HTML/JS) -> Interaction: Klik untuk menampilkan informasi detail dalam modal -> Justification: Menjaga antarmuka utama tetap bersih sambil menyediakan akses mudah ke detail teknis yang mendalam seperti studi kasus dan kuesioner.
+        - Library/Method: Chart.js (Canvas) untuk semua grafik.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f4f4f5; }
+        .tab-active { border-color: #3b82f6; color: #3b82f6; background-color: #eff6ff; }
+        .tab-inactive { border-color: transparent; color: #6b7280; }
+        .modal { transition: opacity 0.25s ease; }
+        .modal-content { transition: transform 0.25s ease; }
+        .tree li { list-style-type: none; margin: 6px 0; position: relative; }
+        .tree li::before { content: ''; position: absolute; top: -14px; left: -20px; border-left: 1px solid #d1d5db; border-bottom: 1px solid #d1d5db; width: 10px; height: 26px; }
+        .tree li:last-child::before { border-left: 1px solid #d1d5db; height: 26px; }
+        .tree ul { padding-left: 20px; border-left: 1px solid #d1d5db; }
+        .tree > ul { border-left: none; }
+        .tree-toggle { cursor: pointer; }
+        .tree-item::before { content: '📁'; margin-right: 8px; font-size: 1.1em; }
+        .tree-file::before { content: '📄'; margin-right: 8px; font-size: 1.1em; color: #6b7280; }
+        .chart-container { position: relative; width: 100%; max-width: 600px; margin-left: auto; margin-right: auto; height: 350px; max-height: 400px; }
+    </style>
+</head>
+<body class="text-stone-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-600">Dasbor Perencanaan Proyek Skripsi</h1>
+            <p class="mt-2 text-lg text-slate-600">SPK Penilaian Karyawan Terbaik di RM Padang Saiyo dengan Metode SMART</p>
+        </header>
+
+        <main>
+            <div class="bg-white rounded-xl shadow-lg p-2 mb-8">
+                <nav class="flex flex-wrap justify-center -mb-px">
+                    <button data-tab="ringkasan" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-active">Ringkasan Proyek</button>
+                    <button data-tab="metodologi" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Metodologi SMART</button>
+                    <button data-tab="arsitektur" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Arsitektur & Teknologi</button>
+                    <button data-tab="fitur" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Fitur & Alur Kerja</button>
+                    <button data-tab="struktur" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Struktur Proyek</button>
+                    <button data-tab="evaluasi" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Evaluasi & Validasi</button>
+                </nav>
+            </div>
+
+            <div id="tab-content" class="bg-white rounded-xl shadow-lg p-6 md:p-8 min-h-[60vh]">
+                <!-- Konten Tab akan dimasukkan di sini oleh JavaScript -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Template Konten Tab -->
+    <template id="ringkasan-template">
+        <section>
+            <h2 class="text-2xl font-bold mb-4 text-blue-600">1. Ringkasan Proyek</h2>
+            <p class="mb-6 text-slate-600">Bagian ini memberikan gambaran umum mengenai proyek skripsi, mulai dari masalah yang ingin diselesaikan hingga solusi yang diusulkan. Ini adalah fondasi konseptual yang akan memandu seluruh proses penelitian dan pengembangan.</p>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+                    <h3 class="font-bold text-lg mb-2 text-blue-800">Masalah Penelitian</h3>
+                    <p class="text-slate-700">Penilaian kinerja karyawan di RM Padang Saiyo saat ini cenderung subjektif, berpotensi menimbulkan bias dan keputusan yang kurang optimal. Proses manual ini tidak memiliki standar yang terukur, sehingga sulit untuk dipertanggungjawabkan dan dapat menurunkan motivasi karyawan.</p>
+                </div>
+                <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                    <h3 class="font-bold text-lg mb-2 text-green-800">Solusi yang Diusulkan</h3>
+                    <p class="text-slate-700">Membangun sebuah Sistem Pendukung Keputusan (SPK) berbasis desktop menggunakan metode <span class="font-semibold">Simple Multi-Attribute Rating Technique (SMART)</span>. Sistem ini akan mengubah penilaian kualitatif menjadi data kuantitatif yang objektif, menghasilkan peringkat karyawan yang adil dan transparan.</p>
+                </div>
+            </div>
+            <div class="mt-8">
+                 <h3 class="font-bold text-xl mb-4 text-slate-700">Tujuan dan Kontribusi Utama</h3>
+                 <ul class="list-disc list-inside space-y-2 text-slate-600">
+                    <li>Mengimplementasikan metode SMART untuk objektivikasi penilaian kinerja.</li>
+                    <li>Merancang dan membangun aplikasi desktop yang fungsional dan mudah digunakan (user-friendly).</li>
+                    <li>Menyediakan alat bantu bagi manajemen untuk membuat keputusan yang lebih baik dan berbasis data.</li>
+                    <li>Menciptakan proses penilaian yang terstruktur, konsisten, dan dapat diaudit.</li>
+                 </ul>
+            </div>
+        </section>
+    </template>
+
+    <template id="metodologi-template">
+        <section>
+            <h2 class="text-2xl font-bold mb-4 text-blue-600">2. Dekonstruksi Metode SMART</h2>
+            <p class="mb-6 text-slate-600">Metode SMART adalah inti dari logika sistem ini. Mari kita pecah prosesnya menjadi langkah-langkah yang dapat dipahami. Setiap langkah mengubah data subjektif menjadi skor objektif yang dapat diperbandingkan.</p>
+            
+            <div class="space-y-4 mb-8">
+                 <!-- Step-by-step process -->
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-500 text-white rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">1</div>
+                    <div class="ml-4">
+                        <h4 class="font-semibold text-lg">Identifikasi & Pembobotan Kriteria</h4>
+                        <p class="text-sm text-slate-500">Menentukan atribut kinerja (misal: Disiplin, Keramahan) dan memberikan bobot awal ($W_j$) berdasarkan tingkat kepentingannya.</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-500 text-white rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">2</div>
+                    <div class="ml-4">
+                        <h4 class="font-semibold text-lg">Normalisasi Bobot ($w_j$)</h4>
+                        <p class="text-sm text-slate-500">Mengubah bobot awal menjadi skala 0-1 agar total bobot menjadi 1. Rumus: $w_j = W_j / \sum W_k$</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-500 text-white rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">3</div>
+                    <div class="ml-4">
+                        <h4 class="font-semibold text-lg">Hitung Nilai Utilitas ($u_i(a_i)$)</h4>
+                        <p class="text-sm text-slate-500">Mengonversi skor mentah (misal: 1-5) ke skala standar 0-1. Rumus: $(C_{out} - C_{min}) / (C_{max} - C_{min})$</p>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-500 text-white rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">4</div>
+                    <div class="ml-4">
+                        <h4 class="font-semibold text-lg">Hitung Nilai Akhir ($U(a_i)$) & Perankingan</h4>
+                        <p class="text-sm text-slate-500">Menggabungkan bobot dan utilitas untuk skor akhir. Rumus: $\sum (w_j \cdot u_i(a_i)_j)$. Karyawan dengan skor tertinggi menjadi peringkat pertama.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t pt-6">
+                <h3 class="text-xl font-bold mb-4 text-slate-700">Kalkulator Interaktif SMART</h3>
+                <p class="mb-4 text-slate-600">Coba simulasikan perhitungan untuk satu karyawan. Masukkan skor mentah (1-5) untuk setiap kriteria di bawah ini dan lihat bagaimana nilai akhir dihitung.</p>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <div id="smart-criteria-inputs" class="space-y-3"></div>
+                        <button id="calculate-smart" class="mt-4 w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">Hitung Nilai Akhir</button>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-lg">
+                        <h4 class="font-semibold text-lg mb-2">Hasil Perhitungan</h4>
+                        <div id="smart-result" class="text-slate-600 space-y-2">
+                             <p>Hasil akan muncul di sini...</p>
+                        </div>
+                        <div class="mt-4">
+                            <h4 class="font-semibold text-lg mb-2">Visualisasi Skor Akhir</h4>
+                             <div class="chart-container h-48 md:h-64">
+                                <canvas id="smartResultChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+    
+    <template id="arsitektur-template">
+        <section>
+            <h2 class="text-2xl font-bold mb-4 text-blue-600">3. Arsitektur & Teknologi</h2>
+            <p class="mb-6 text-slate-600">Pemilihan arsitektur dan teknologi yang tepat adalah kunci untuk membangun aplikasi yang andal, mudah dipelihara, dan relevan dengan standar industri. Berikut adalah cetak biru teknis yang direkomendasikan untuk proyek ini.</p>
+            
+            <div class="mb-8">
+                <h3 class="text-xl font-bold mb-4 text-slate-700">Arsitektur yang Direkomendasikan: Model-View-Presenter (MVP)</h3>
+                <div class="bg-slate-50 p-6 rounded-lg">
+                    <p class="mb-4 text-slate-600">Pola MVP dipilih karena memisahkan secara tegas antara logika bisnis (Model), tampilan antarmuka (View), dan logika presentasi (Presenter). Keunggulan utamanya adalah **testabilitas** yang tinggi, di mana logika inti pada Presenter dapat diuji secara terpisah tanpa harus melibatkan UI, sebuah nilai plus yang sangat signifikan untuk skripsi.</p>
+                    <div class="flex flex-col md:flex-row justify-around items-center text-center space-y-4 md:space-y-0">
+                        <div class="p-4 rounded-lg bg-white shadow-md w-48">
+                            <div class="text-2xl mb-2">👤</div>
+                            <h4 class="font-bold">Pengguna</h4>
+                        </div>
+                        <div class="font-bold text-2xl text-blue-500">&harr;</div>
+                        <div class="p-4 rounded-lg bg-white shadow-md w-48">
+                            <div class="text-2xl mb-2">🖥️</div>
+                            <h4 class="font-bold">View</h4>
+                            <p class="text-xs text-slate-500">(Pasif, hanya menampilkan UI)</p>
+                        </div>
+                         <div class="font-bold text-2xl text-blue-500">&harr;</div>
+                        <div class="p-4 rounded-lg bg-white shadow-md w-48">
+                            <div class="text-2xl mb-2">💼</div>
+                            <h4 class="font-bold">Presenter</h4>
+                            <p class="text-xs text-slate-500">(Logika alur kerja & presentasi)</p>
+                        </div>
+                         <div class="font-bold text-2xl text-blue-500">&harr;</div>
+                        <div class="p-4 rounded-lg bg-white shadow-md w-48">
+                            <div class="text-2xl mb-2">💾</div>
+                            <h4 class="font-bold">Model</h4>
+                            <p class="text-xs text-slate-500">(Logika bisnis & akses data)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-bold mb-4 text-slate-700">Tumpukan Teknologi (Technology Stack)</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="p-4 bg-white border rounded-lg text-center shadow-sm">
+                        <p class="text-4xl">☕</p>
+                        <h4 class="font-semibold mt-2">Java SE</h4>
+                        <p class="text-xs text-slate-500">Platform inti yang stabil & matang.</p>
+                    </div>
+                    <div class="p-4 bg-white border rounded-lg text-center shadow-sm">
+                        <p class="text-4xl">✨</p>
+                        <h4 class="font-semibold mt-2">JavaFX</h4>
+                        <p class="text-xs text-slate-500">Framework GUI modern untuk UI yang kaya.</p>
+                    </div>
+                    <div class="p-4 bg-white border rounded-lg text-center shadow-sm">
+                         <p class="text-4xl">🗄️</p>
+                        <h4 class="font-semibold mt-2">H2 Database</h4>
+                        <p class="text-xs text-slate-500">Database embedded, tanpa instalasi.</p>
+                    </div>
+                    <div class="p-4 bg-white border rounded-lg text-center shadow-sm">
+                        <p class="text-4xl">📊</p>
+                        <h4 class="font-semibold mt-2">JasperReports</h4>
+                        <p class="text-xs text-slate-500">Standar industri untuk pelaporan PDF.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+    
+    <template id="fitur-template">
+        <section>
+            <h2 class="text-2xl font-bold mb-4 text-blue-600">4. Fitur & Alur Kerja Pengguna</h2>
+            <p class="mb-6 text-slate-600">Sistem ini dirancang dengan dua peran pengguna yang jelas untuk memastikan integritas data. Administrator mengatur "aturan main", sedangkan Manajer mengeksekusi penilaian. Jelajahi fitur yang tersedia untuk setiap peran.</p>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="md:col-span-1">
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">Pilih Peran Pengguna</h3>
+                    <div class="flex flex-col space-y-2">
+                        <button class="role-btn w-full text-left p-3 rounded-lg transition-colors bg-blue-500 text-white" data-role="administrator">
+                            <span class="font-bold">👑 Administrator</span>
+                            <span class="block text-xs font-normal">Mengelola sistem & konfigurasi</span>
+                        </button>
+                        <button class="role-btn w-full text-left p-3 rounded-lg transition-colors bg-slate-200 text-slate-700" data-role="manajer">
+                            <span class="font-bold">👤 Manajer</span>
+                            <span class="block text-xs font-normal">Melakukan penilaian rutin</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="md:col-span-2">
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">Hak Akses Fitur</h3>
+                    <div id="feature-list" class="bg-slate-50 p-4 rounded-lg">
+                        <!-- Fitur akan dimuat di sini oleh JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t mt-8 pt-6">
+                <h3 class="text-xl font-bold mb-4 text-slate-700">Alur Kerja Penilaian (Manajer)</h3>
+                <div class="relative">
+                    <div class="border-l-2 border-blue-200 absolute h-full top-0 left-4"></div>
+                    <div class="space-y-6">
+                        <div class="flex items-start">
+                            <div class="z-10 bg-white border-2 border-blue-500 text-blue-500 rounded-full h-8 w-8 flex items-center justify-center font-bold">1</div>
+                            <div class="ml-4">
+                                <h4 class="font-semibold">Login & Pilih Periode</h4>
+                                <p class="text-sm text-slate-500">Masuk ke sistem dan tentukan bulan penilaian.</p>
+                            </div>
+                        </div>
+                         <div class="flex items-start">
+                            <div class="z-10 bg-white border-2 border-blue-500 text-blue-500 rounded-full h-8 w-8 flex items-center justify-center font-bold">2</div>
+                            <div class="ml-4">
+                                <h4 class="font-semibold">Input Skor Penilaian</h4>
+                                <p class="text-sm text-slate-500">Mengisi skor untuk setiap karyawan berdasarkan kriteria.</p>
+                            </div>
+                        </div>
+                         <div class="flex items-start">
+                            <div class="z-10 bg-white border-2 border-blue-500 text-blue-500 rounded-full h-8 w-8 flex items-center justify-center font-bold">3</div>
+                            <div class="ml-4">
+                                <h4 class="font-semibold">Proses & Lihat Hasil</h4>
+                                <p class="text-sm text-slate-500">Sistem menghitung dan menampilkan peringkat akhir.</p>
+                            </div>
+                        </div>
+                         <div class="flex items-start">
+                            <div class="z-10 bg-white border-2 border-blue-500 text-blue-500 rounded-full h-8 w-8 flex items-center justify-center font-bold">4</div>
+                            <div class="ml-4">
+                                <h4 class="font-semibold">Cetak Laporan</h4>
+                                <p class="text-sm text-slate-500">Menghasilkan dokumen PDF resmi untuk arsip.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+    
+    <template id="struktur-template">
+        <section>
+            <h2 class="text-2xl font-bold mb-4 text-blue-600">5. Struktur Proyek Profesional</h2>
+            <p class="mb-6 text-slate-600">Organisasi file yang baik adalah kunci untuk proyek yang mudah dikelola. Berikut adalah struktur folder standar yang direkomendasikan untuk kode sumber aplikasi dan dokumen penelitian Anda. Klik pada folder untuk melihat isinya.</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">Struktur Proyek Aplikasi (Maven)</h3>
+                    <div id="app-structure-tree" class="bg-slate-50 p-4 rounded-lg text-sm"></div>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">Struktur Dokumentasi Skripsi</h3>
+                    <div id="doc-structure-tree" class="bg-slate-50 p-4 rounded-lg text-sm"></div>
+                </div>
+            </div>
+        </section>
+    </template>
+    
+    <template id="evaluasi-template">
+         <section>
+            <h2 class="text-2xl font-bold mb-4 text-blue-600">6. Evaluasi & Validasi Sistem</h2>
+            <p class="mb-6 text-slate-600">Setelah sistem dibangun, evaluasi yang ketat diperlukan untuk membuktikan nilainya. Pendekatan tiga pilar ini memastikan sistem tidak hanya berfungsi secara teknis, tetapi juga mudah digunakan dan menghasilkan keputusan yang akurat.</p>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-lg border shadow-sm flex flex-col">
+                    <h3 class="font-bold text-lg mb-2 text-slate-800">Pilar 1: Verifikasi Fungsional</h3>
+                    <p class="text-slate-600 text-sm flex-grow">Menguji apakah setiap fitur berjalan sesuai spesifikasi menggunakan metode <span class="font-semibold">Black Box Testing</span>. Tujuannya adalah memastikan "sistem dibangun dengan benar".</p>
+                    <button class="modal-trigger mt-4 bg-slate-100 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition-colors text-sm" data-modal="modal-fungsional">Lihat Contoh Test Case</button>
+                </div>
+                <div class="bg-white p-6 rounded-lg border shadow-sm flex flex-col">
+                    <h3 class="font-bold text-lg mb-2 text-slate-800">Pilar 2: Penilaian Usability</h3>
+                    <p class="text-slate-600 text-sm flex-grow">Mengukur kemudahan penggunaan dari perspektif manajer menggunakan kuesioner standar industri <span class="font-semibold">System Usability Scale (SUS)</span>. Tujuannya adalah memastikan "sistem mudah digunakan".</p>
+                     <button class="modal-trigger mt-4 bg-slate-100 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition-colors text-sm" data-modal="modal-usability">Lihat Kuesioner SUS</button>
+                </div>
+                <div class="bg-white p-6 rounded-lg border shadow-sm flex flex-col">
+                    <h3 class="font-bold text-lg mb-2 text-slate-800">Pilar 3: Validasi Akurasi</h3>
+                    <p class="text-slate-600 text-sm flex-grow">Membandingkan peringkat hasil sistem dengan penilaian pakar (manajer) menggunakan <span class="font-semibold">Korelasi Peringkat Spearman</span>. Tujuannya adalah memastikan "sistem yang dibangun sudah tepat".</p>
+                     <button class="modal-trigger mt-4 bg-slate-100 text-slate-700 font-semibold py-2 px-4 rounded-lg hover:bg-slate-200 transition-colors text-sm" data-modal="modal-akurasi">Lihat Contoh Perhitungan</button>
+                </div>
+            </div>
+         </section>
+    </template>
+    
+    <!-- Modals -->
+    <div id="modal-fungsional" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 opacity-0 pointer-events-none">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-4xl p-6 transform scale-95">
+            <h3 class="text-xl font-bold mb-4">Contoh Test Case: Pengujian Black Box</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr><th class="px-6 py-3">ID</th><th class="px-6 py-3">Skenario</th><th class="px-6 py-3">Hasil Diharapkan</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr class="bg-white border-b"><td class="px-6 py-4 font-medium">TC-KR-01</td><td class="px-6 py-4">Tambah Karyawan dengan data valid</td><td class="px-6 py-4">Data berhasil disimpan & pesan sukses muncul.</td></tr>
+                        <tr class="bg-gray-50 border-b"><td class="px-6 py-4 font-medium">TC-KR-02</td><td class="px-6 py-4">Tambah Karyawan dengan nama kosong</td><td class="px-6 py-4">Sistem menolak, pesan error muncul.</td></tr>
+                        <tr class="bg-white border-b"><td class="px-6 py-4 font-medium">TC-PN-02</td><td class="px-6 py-4">Input skor penilaian di luar batas (misal: 6)</td><td class="px-6 py-4">Input ditolak, pesan error muncul.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <button class="modal-close mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Tutup</button>
+        </div>
+    </div>
+    
+    <div id="modal-usability" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 opacity-0 pointer-events-none">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-2xl p-6 transform scale-95">
+            <h3 class="text-xl font-bold mb-4">Kuesioner System Usability Scale (SUS)</h3>
+             <p class="text-sm text-slate-600 mb-4">Responden (manajer) akan menilai 10 pernyataan berikut dengan skala 1 (Sangat Tidak Setuju) hingga 5 (Sangat Setuju).</p>
+             <ol class="list-decimal list-inside text-sm space-y-2">
+                <li>Saya berpikir akan sering menggunakan sistem ini.</li>
+                <li>Saya merasa sistem ini terlalu rumit.</li>
+                <li>Saya merasa sistem ini mudah untuk digunakan.</li>
+                <li>Saya pikir saya membutuhkan bantuan teknis untuk dapat menggunakan sistem ini.</li>
+                <li>Saya menemukan berbagai fungsi dalam sistem ini terintegrasi dengan baik.</li>
+             </ol>
+             <p class="text-xs text-slate-500 my-2">(dan 5 pernyataan lainnya...)</p>
+            <button class="modal-close mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Tutup</button>
+        </div>
+    </div>
+
+    <div id="modal-akurasi" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 opacity-0 pointer-events-none">
+        <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-3xl p-6 transform scale-95">
+            <h3 class="text-xl font-bold mb-4">Contoh Perhitungan Validasi Akurasi</h3>
+             <p class="text-sm text-slate-600 mb-4">Peringkat dari sistem dibandingkan dengan peringkat dari pakar (manajer) untuk menghitung koefisien korelasi Spearman ($ \rho $). Nilai mendekati +1 menunjukkan akurasi tinggi.</p>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left text-gray-500">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <tr><th class="px-6 py-3">Karyawan</th><th class="px-6 py-3">Peringkat Sistem (x)</th><th class="px-6 py-3">Peringkat Pakar (y)</th><th class="px-6 py-3">d (x-y)</th><th class="px-6 py-3">d²</th></tr>
+                    </thead>
+                     <tbody>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">Karyawan A</td><td class="px-6 py-4">1</td><td class="px-6 py-4">2</td><td class="px-6 py-4">-1</td><td class="px-6 py-4">1</td></tr>
+                        <tr class="bg-gray-50 border-b"><td class="px-6 py-4">Karyawan B</td><td class="px-6 py-4">2</td><td class="px-6 py-4">1</td><td class="px-6 py-4">1</td><td class="px-6 py-4">1</td></tr>
+                        <tr class="bg-white border-b"><td class="px-6 py-4">Karyawan C</td><td class="px-6 py-4">3</td><td class="px-6 py-4">3</td><td class="px-6 py-4">0</td><td class="px-6 py-4">0</td></tr>
+                     </tbody>
+                </table>
+            </div>
+            <div class="mt-4 text-center font-mono bg-slate-100 p-2 rounded">
+                 $ \rho = 1 - \frac{6 \sum d_i^2}{n(n^2 - 1)} $
+            </div>
+            <button class="modal-close mt-6 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700">Tutup</button>
+        </div>
+    </div>
+
+
+    <script>
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContentContainer = document.getElementById('tab-content');
+        const templates = {
+            ringkasan: document.getElementById('ringkasan-template'),
+            metodologi: document.getElementById('metodologi-template'),
+            arsitektur: document.getElementById('arsitektur-template'),
+            fitur: document.getElementById('fitur-template'),
+            struktur: document.getElementById('struktur-template'),
+            evaluasi: document.getElementById('evaluasi-template'),
+        };
+
+        const featuresData = {
+            administrator: [
+                { name: 'Login Sistem', desc: 'Autentikasi pengguna', access: 'CRUD' },
+                { name: 'Manajemen Pengguna', desc: 'Membuat, mengubah, menghapus akun lain', access: 'CRUD' },
+                { name: 'Manajemen Data Karyawan', desc: 'Mengelola data dasar karyawan', access: 'CRUD' },
+                { name: 'Manajemen Kriteria', desc: 'Menambah/mengubah/menghapus kriteria penilaian', access: 'CRUD' },
+                { name: 'Manajemen Bobot', desc: 'Mengatur bobot setiap kriteria', access: 'Update' },
+                { name: 'Lihat & Cetak Laporan', desc: 'Melihat dan mencetak semua laporan', access: 'Read' },
+            ],
+            manajer: [
+                { name: 'Login Sistem', desc: 'Autentikasi pengguna', access: 'Read' },
+                { name: 'Lihat Data Karyawan', desc: 'Hanya dapat melihat daftar karyawan', access: 'Read-Only' },
+                { name: 'Lihat Kriteria & Bobot', desc: 'Hanya dapat melihat kriteria & bobot yang aktif', access: 'Read-Only' },
+                { name: 'Input Skor Penilaian', desc: 'Memasukkan skor karyawan untuk periode tertentu', access: 'CRUD' },
+                { name: 'Proses Kalkulasi SMART', desc: 'Memicu proses perhitungan peringkat', access: 'Execute' },
+                { name: 'Lihat Hasil Peringkat', desc: 'Melihat hasil peringkat akhir', access: 'Read-Only' },
+                { name: 'Cetak Laporan Hasil', desc: 'Mencetak laporan hasil penilaian', access: 'Execute' },
+            ]
+        };
+        
+        const appStructureData = {
+            name: 'RumahMakanSaiyo-DSS',
+            children: [
+                { name: 'pom.xml', type: 'file' },
+                { name: 'src', children: [
+                    { name: 'main', children: [
+                        { name: 'java', children: [
+                            { name: 'com/saiyo/dss', children: [
+                                { name: 'App.java', type: 'file' },
+                                { name: 'model', children: [ { name: 'Karyawan.java', type: 'file' } ] },
+                                { name: 'service', children: [ { name: 'SmartService.java', type: 'file' } ] },
+                                { name: 'view', children: [ { name: 'PenilaianForm.java', type: 'file' } ] },
+                                { name: 'presenter', children: [ { name: 'PenilaianPresenter.java', type: 'file' } ] },
+                            ]}
+                        ]},
+                        { name: 'resources', children: [
+                            { name: 'reports', children: [ { name: 'LaporanPeringkat.jrxml', type: 'file' } ]},
+                            { name: 'images', children: [] }
+                        ]}
+                    ]},
+                    { name: 'test', children: [
+                        { name: 'java', children: [
+                            { name: 'com/saiyo/dss', children: [
+                                { name: 'service', children: [ { name: 'SmartServiceTest.java', type: 'file' }] }
+                            ]}
+                        ]}
+                    ]}
+                ]}
+            ]
+        };
+
+        const docStructureData = {
+            name: 'Skripsi-DSS-Karyawan-Saiyo',
+            children: [
+                { name: '01_Naskah_Skripsi', children: [
+                    { name: 'BAB_I_Pendahuluan.docx', type: 'file' },
+                    { name: 'BAB_II_Tinjauan_Pustaka.docx', type: 'file' },
+                    { name: 'BAB_III_Metodologi_Penelitian.docx', type: 'file' },
+                ]},
+                { name: '02_Sumber_Referensi', children: [
+                    { name: 'Jurnal', children: [{ name: 'Jurnal_Metode_SMART_1.pdf', type: 'file' }] },
+                    { name: 'Buku', children: [] },
+                ]},
+                { name: '03_Data_Penelitian', children: [
+                    { name: 'Kuesioner_Wawancara.docx', type: 'file'},
+                    { name: 'Data_Kuesioner_SUS.xlsx', type: 'file'},
+                ]},
+                { name: '04_Presentasi_Sidang', children: [{ name: 'Presentasi_Sidang_Skripsi.pptx', type: 'file' }]},
+                { name: '05_Artefak_Aplikasi', children: [
+                    { name: 'RumahMakanSaiyo-DSS/', type: 'folder' },
+                    { name: 'RumahMakanSaiyo-DSS.jar', type: 'file' },
+                ]},
+            ]
+        };
+
+        function switchTab(tabName) {
+            tabButtons.forEach(button => {
+                const isActive = button.dataset.tab === tabName;
+                button.classList.toggle('tab-active', isActive);
+                button.classList.toggle('tab-inactive', !isActive);
+            });
+            tabContentContainer.innerHTML = '';
+            const template = templates[tabName];
+            if (template) {
+                tabContentContainer.appendChild(template.content.cloneNode(true));
+                // Post-render initializations
+                if (tabName === 'fitur') initFiturTab();
+                if (tabName === 'struktur') initStrukturTab();
+                if (tabName === 'evaluasi') initEvaluasiTab();
+                if (tabName === 'metodologi') initMetodologiTab();
+            }
+        }
+
+        function initFiturTab() {
+            const roleButtons = document.querySelectorAll('.role-btn');
+            const featureListContainer = document.getElementById('feature-list');
+
+            function renderFeatures(role) {
+                let html = '<ul class="space-y-3">';
+                featuresData[role].forEach(feature => {
+                    html += `
+                        <li class="p-3 bg-white rounded-md shadow-sm border-l-4 border-blue-500">
+                            <h4 class="font-semibold">${feature.name}</h4>
+                            <p class="text-sm text-slate-500">${feature.desc}</p>
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+                featureListContainer.innerHTML = html;
+            }
+
+            roleButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    roleButtons.forEach(btn => {
+                        btn.classList.remove('bg-blue-500', 'text-white');
+                        btn.classList.add('bg-slate-200', 'text-slate-700');
+                    });
+                    button.classList.add('bg-blue-500', 'text-white');
+                    button.classList.remove('bg-slate-200', 'text-slate-700');
+                    renderFeatures(button.dataset.role);
+                });
+            });
+            renderFeatures('administrator');
+        }
+
+        function createTree(data) {
+            let html = '<ul>';
+            data.children.forEach(item => {
+                const isFolder = item.children && item.children.length > 0;
+                const isFile = item.type === 'file';
+                html += `<li class="${isFile ? 'tree-file' : 'tree-item'}">`;
+                if (isFolder) {
+                    html += `<span class="tree-toggle font-semibold">${item.name}</span>`;
+                    html += `<div class="hidden">${createTree(item)}</div>`;
+                } else {
+                    html += `<span>${item.name}</span>`;
+                }
+                html += '</li>';
+            });
+            html += '</ul>';
+            return html;
+        }
+
+        function initStrukturTab() {
+            const appTreeContainer = document.getElementById('app-structure-tree');
+            const docTreeContainer = document.getElementById('doc-structure-tree');
+            
+            appTreeContainer.innerHTML = `<div class="tree"><span class="tree-toggle font-bold">${appStructureData.name}</span><div class="hidden">${createTree(appStructureData)}</div></div>`;
+            docTreeContainer.innerHTML = `<div class="tree"><span class="tree-toggle font-bold">${docStructureData.name}</span><div class="hidden">${createTree(docStructureData)}</div></div>`;
+
+            document.querySelectorAll('.tree-toggle').forEach(toggle => {
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const nextSibling = e.target.nextElementSibling;
+                    if (nextSibling) {
+                        nextSibling.classList.toggle('hidden');
+                    }
+                });
+            });
+        }
+        
+        function initEvaluasiTab() {
+            document.querySelectorAll('.modal-trigger').forEach(trigger => {
+                trigger.addEventListener('click', () => {
+                    const modal = document.getElementById(trigger.dataset.modal);
+                    openModal(modal);
+                });
+            });
+
+            document.querySelectorAll('.modal-close').forEach(button => {
+                button.addEventListener('click', () => {
+                    const modal = button.closest('.modal');
+                    closeModal(modal);
+                });
+            });
+
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.addEventListener('click', (event) => {
+                    if (event.target === modal) {
+                        closeModal(modal);
+                    }
+                });
+            });
+        }
+        
+        function openModal(modal) {
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.querySelector('.modal-content').classList.remove('scale-95');
+        }
+
+        function closeModal(modal) {
+            modal.classList.add('opacity-0');
+            modal.querySelector('.modal-content').classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('pointer-events-none');
+            }, 250);
+        }
+        
+        function initMetodologiTab() {
+            const criteria = [
+                { id: 'c1', name: 'Kedisiplinan', weight: 25 },
+                { id: 'c2', name: 'Kecepatan Pelayanan', weight: 20 },
+                { id: 'c3', name: 'Keramahan', weight: 30 },
+                { id: 'c4', name: 'Inisiatif', weight: 10 },
+                { id: 'c5', name: 'Kerjasama Tim', weight: 15 },
+            ];
+            const inputsContainer = document.getElementById('smart-criteria-inputs');
+            const resultContainer = document.getElementById('smart-result');
+            const calculateBtn = document.getElementById('calculate-smart');
+            let resultChart;
+
+            function renderInputs() {
+                inputsContainer.innerHTML = criteria.map(c => `
+                    <div class="grid grid-cols-3 gap-2 items-center">
+                        <label for="${c.id}" class="col-span-2 text-sm font-medium">${c.name} (Bobot: ${c.weight})</label>
+                        <input type="number" id="${c.id}" class="w-full border-gray-300 rounded-md shadow-sm text-center" min="1" max="5" value="3">
+                    </div>
+                `).join('');
+            }
+            
+            function calculateSmart() {
+                const totalWeight = criteria.reduce((sum, c) => sum + c.weight, 0);
+                const normalizedWeights = criteria.map(c => ({ ...c, normWeight: c.weight / totalWeight }));
+                
+                let finalScore = 0;
+                let calculationSteps = '<ul class="text-xs space-y-1">';
+
+                normalizedWeights.forEach(c => {
+                    const scoreInput = document.getElementById(c.id);
+                    const rawScore = parseInt(scoreInput.value);
+                    const c_min = 1;
+                    const c_max = 5;
+                    const utility = (rawScore - c_min) / (c_max - c_min);
+                    const weightedUtility = utility * c.normWeight;
+                    finalScore += weightedUtility;
+                    
+                    calculationSteps += `<li><b>${c.name}</b>: Skor ${rawScore} &rarr; Utilitas ${utility.toFixed(3)} &rarr; Kontribusi ${weightedUtility.toFixed(3)}</li>`;
+                });
+                
+                calculationSteps += '</ul>';
+
+                resultContainer.innerHTML = `
+                    <p class="font-semibold">Nilai Akhir: <span class="text-2xl text-blue-600 font-bold">${finalScore.toFixed(4)}</span></p>
+                    <p class="text-sm text-slate-500 mt-2">Detail Perhitungan:</p>
+                    ${calculationSteps}
+                `;
+                
+                updateResultChart(finalScore);
+            }
+
+            function updateResultChart(score) {
+                const ctx = document.getElementById('smartResultChart').getContext('2d');
+                if (resultChart) {
+                    resultChart.destroy();
+                }
+                resultChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Nilai Akhir'],
+                        datasets: [{
+                            label: 'Skor Karyawan',
+                            data: [score],
+                            backgroundColor: ['#3b82f6'],
+                            borderColor: ['#2563eb'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 1.0
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            renderInputs();
+            calculateBtn.addEventListener('click', calculateSmart);
+            calculateSmart(); // Initial calculation
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            switchTab('ringkasan');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => switchTab(button.dataset.tab));
+            });
+        });
+
+    </script>
+</body>
+</html>
