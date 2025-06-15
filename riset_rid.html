@@ -15,7 +15,8 @@
         - Arsitektur & Teknologi -> Goal: Organize & Inform -> Presentation: Kartu teknologi dan diagram alur MVP (HTML/Flexbox) -> Interaction: Hover untuk detail (implementasi di masa depan) -> Justification: Menyajikan tumpukan teknologi dan pola arsitektur secara visual dan jelas.
         - Fitur & Alur Kerja -> Goal: Compare & Organize -> Presentation: Tombol filter peran dan diagram alir proses (HTML/CSS) -> Interaction: Klik tombol untuk memfilter daftar fitur secara dinamis -> Justification: Memudahkan pemahaman tentang hak akses dan alur kerja pengguna secara visual.
         - Struktur Proyek -> Goal: Organize Hierarchy -> Presentation: Struktur pohon file interaktif (HTML/JS) -> Interaction: Klik untuk membuka/menutup direktori -> Justification: Jauh lebih intuitif daripada membaca daftar teks biasa.
-        - Pengujian & Validasi -> Goal: Inform in Detail -> Presentation: Kartu dengan tombol 'Lihat Detail' yang membuka modal (HTML/JS) -> Interaction: Klik untuk menampilkan informasi detail dalam modal -> Justification: Menjaga antarmuka utama tetap bersih sambil menyediakan akses mudah ke detail teknis yang mendalam seperti studi kasus dan kuesioner.
+        - Evaluasi & Validasi -> Goal: Inform in Detail -> Presentation: Kartu dengan tombol 'Lihat Detail' yang membuka modal (HTML/JS) -> Interaction: Klik untuk menampilkan informasi detail dalam modal -> Justification: Menjaga antarmuka utama tetap bersih sambil menyediakan akses mudah ke detail teknis yang mendalam seperti studi kasus dan kuesioner.
+        - Peralatan & Persiapan -> Goal: Inform & List -> Presentation: Kartu berikon untuk setiap alat (HTML/Grid) -> Interaction: Statis -> Justification: Menyediakan daftar periksa visual yang jelas untuk persiapan proyek.
         - Library/Method: Chart.js (Canvas) untuk semua grafik.
     -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
@@ -47,12 +48,13 @@
         <main>
             <div class="bg-white rounded-xl shadow-lg p-2 mb-8">
                 <nav class="flex flex-wrap justify-center -mb-px">
-                    <button data-tab="ringkasan" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-active">Ringkasan Proyek</button>
-                    <button data-tab="metodologi" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Metodologi SMART</button>
-                    <button data-tab="arsitektur" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Arsitektur & Teknologi</button>
-                    <button data-tab="fitur" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Fitur & Alur Kerja</button>
+                    <button data-tab="ringkasan" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-active">Ringkasan</button>
+                    <button data-tab="metodologi" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Metodologi</button>
+                    <button data-tab="arsitektur" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Arsitektur</button>
+                    <button data-tab="fitur" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Fitur</button>
                     <button data-tab="struktur" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Struktur Proyek</button>
-                    <button data-tab="evaluasi" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Evaluasi & Validasi</button>
+                    <button data-tab="evaluasi" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Evaluasi</button>
+                    <button data-tab="peralatan" class="tab-btn text-sm md:text-base font-medium text-center p-3 border-b-2 tab-inactive">Peralatan</button>
                 </nav>
             </div>
 
@@ -95,7 +97,7 @@
             <p class="mb-6 text-slate-600">Metode SMART adalah inti dari logika sistem ini. Mari kita pecah prosesnya menjadi langkah-langkah yang dapat dipahami. Setiap langkah mengubah data subjektif menjadi skor objektif yang dapat diperbandingkan.</p>
             
             <div class="space-y-4 mb-8">
-                 <!-- Step-by-step process -->
+                <!-- Step-by-step process -->
                 <div class="flex items-center">
                     <div class="flex-shrink-0 bg-blue-500 text-white rounded-full h-10 w-10 flex items-center justify-center font-bold text-lg">1</div>
                     <div class="ml-4">
@@ -322,6 +324,89 @@
          </section>
     </template>
     
+    <template id="peralatan-template">
+        <section>
+            <h2 class="text-2xl font-bold mb-4 text-blue-600">7. Peralatan & Persiapan</h2>
+            <p class="mb-6 text-slate-600">Berikut adalah daftar periksa perangkat lunak yang perlu Anda siapkan untuk memulai pengembangan proyek ini. Pastikan semua alat ini terinstal dan berfungsi dengan baik di komputer Anda.</p>
+            
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">Lingkungan Pengembangan Utama</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-lg flex items-center gap-4">
+                            <div class="text-4xl">☕</div>
+                            <div>
+                                <h4 class="font-semibold">Java Development Kit (JDK)</h4>
+                                <p class="text-sm text-slate-500">Mesin inti untuk menjalankan Java. Rekomendasi: JDK 17 atau 21 (LTS).</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg flex items-center gap-4">
+                            <div class="text-4xl">💻</div>
+                            <div>
+                                <h4 class="font-semibold">Apache NetBeans IDE</h4>
+                                <p class="text-sm text-slate-500">"Bengkel kerja" utama untuk menulis kode, mendesain, dan menjalankan aplikasi.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">Pustaka & Framework Inti</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-lg flex items-center gap-4">
+                            <div class="text-4xl">📦</div>
+                            <div>
+                                <h4 class="font-semibold">Apache Maven</h4>
+                                <p class="text-sm text-slate-500">Mengelola semua pustaka (library) secara otomatis. Terintegrasi di NetBeans.</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg flex items-center gap-4">
+                            <div class="text-4xl">✨</div>
+                            <div>
+                                <h4 class="font-semibold">JavaFX</h4>
+                                <p class="text-sm text-slate-500">Framework untuk membuat antarmuka pengguna (GUI) aplikasi.</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg flex items-center gap-4">
+                            <div class="text-4xl">📊</div>
+                            <div>
+                                <h4 class="font-semibold">JasperReports Library</h4>
+                                <p class="text-sm text-slate-500">Pustaka untuk membuat fitur "Cetak Laporan" menjadi PDF.</p>
+                            </div>
+                        </div>
+                         <div class="bg-slate-50 p-4 rounded-lg flex items-center gap-4">
+                            <div class="text-4xl">🗄️</div>
+                            <div>
+                                <h4 class="font-semibold">H2 Database Engine</h4>
+                                <p class="text-sm text-slate-500">Database portabel yang menyatu dengan aplikasi Anda.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-xl font-bold mb-4 text-slate-700">Alat Bantu (Sangat Direkomendasikan)</h3>
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-slate-50 p-4 rounded-lg flex items-center gap-4">
+                            <div class="text-4xl">🎨</div>
+                            <div>
+                                <h4 class="font-semibold">Jaspersoft Studio</h4>
+                                <p class="text-sm text-slate-500">Aplikasi terpisah untuk mendesain template visual laporan.</p>
+                            </div>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg flex items-center gap-4">
+                            <div class="text-4xl">🌿</div>
+                            <div>
+                                <h4 class="font-semibold">Git & GitHub Desktop</h4>
+                                <p class="text-sm text-slate-500">Untuk melacak perubahan kode dan membuat cadangan (backup) secara profesional.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </template>
+    
     <!-- Modals -->
     <div id="modal-fungsional" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 opacity-0 pointer-events-none">
         <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-4xl p-6 transform scale-95">
@@ -392,6 +477,7 @@
             fitur: document.getElementById('fitur-template'),
             struktur: document.getElementById('struktur-template'),
             evaluasi: document.getElementById('evaluasi-template'),
+            peralatan: document.getElementById('peralatan-template'),
         };
 
         const featuresData = {
@@ -686,7 +772,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            switchTab('ringkasan');
+            // Set default tab to "peralatan" if it exists, otherwise "ringkasan"
+            const initialTab = templates.peralatan ? 'peralatan' : 'ringkasan';
+            switchTab(initialTab);
+            
             tabButtons.forEach(button => {
                 button.addEventListener('click', () => switchTab(button.dataset.tab));
             });
